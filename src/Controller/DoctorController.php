@@ -5,6 +5,8 @@ namespace App\Controller;
 
 use App\Entity\Doctor;
 use App\Helper\DoctorFactory;
+use App\Helper\ExtractDataRequest;
+use App\Repository\DoctorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,109 +15,52 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
-class DoctorController extends AbstractController
+class DoctorController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-
     /**
      * @var DoctorFactory
      */
     private $doctorFactory;
+    /**
+     * @var DoctorRepository
+     */
+    private $doctorRepository;
 
 
-    public function __construct(EntityManagerInterface $entityManager, DoctorFactory $doctorFactory)
-    {
-        $this->entityManager = $entityManager;
+    public function __construct(EntityManagerInterface $entityManager,
+        DoctorFactory $doctorFactory,
+        DoctorRepository $doctorRepository,
+        ExtractDataRequest $extractDataRequest
+    ){
+        parent::__construct($entityManager, $doctorFactory, $doctorRepository, $extractDataRequest) ;
         $this->doctorFactory = $doctorFactory;
+        $this->doctorRepository = $doctorRepository;
     }
 
-    /**
-     * @Route ("/medicos", methods={"POST"})
-     */
-    public function createDoctor(Request $request): Response
+    public function changeEntityAlreadyExist(int $id, $entity): Doctor
     {
-        $body = $request->getContent();
-        $doctor = $this->doctorFactory->createDoctor($body);
-
-        $this->entityManager->persist($doctor);
-        $this->entityManager->flush();
-
-        return new JsonResponse($doctor);
-    }
-
-    /**
-     * @Route ("/medicos", methods={"GET"})
-     */
-    public function getAllDoctor(Request $request): Response
-    {
-        $repositoryDoctors = $this->getDoctrine()->getRepository(Doctor::class);
-
-        $doctorList = $repositoryDoctors->findAll();
-        return new JsonResponse($doctorList);
-    }
-
-    /**
-     * @Route ("/medicos/{id}", methods={"GET"})
-     */
-    public function getOneDoctor(int $id): Response
-    {
-        $doctor = $this->findDoctor($id);
-
-        $codeReturn = is_null($doctor) ? Response::HTTP_NO_CONTENT : 200;
-
-        return new JsonResponse($doctor, $codeReturn);
-
-    }
-
-    /**
-     * @Route("/medicos/{id}", methods={"PUT"})
-     */
-    public function changeDoctor(int $id, Request $request): Response
-    {
-        $body = $request->getContent();
-
-        $doctorSend = $this->doctorFactory->createDoctor($body);
-
-        $doctor = $this->findDoctor($id);
-
-        if(is_null($doctor)){
-            return new Response('', Response::HTTP_NOT_FOUND);
+        /** @var Doctor $changeEntityAlreadyExist */
+        $changeEntityAlreadyExist = $this->repository->find($id);
+        if (is_null($changeEntityAlreadyExist)) {
+            throw new \InvalidArgumentException();
         }
 
-        //Está alterando o dados recebido na requisicao no banco
-        $doctor->setCrm($doctorSend->getCrm());
-        $doctor->setName($doctorSend->getName());
+        $changeEntityAlreadyExist->setCrm($entity->getCrm());
+        $changeEntityAlreadyExist->setName($entity->getName());
 
-        //Persistindo as alterações. Nao é necessario o persist pois já está sendo observado pelo doctrine.
-        $this->entityManager->flush();
-
-        return new JsonResponse($doctor);
-
+        return $changeEntityAlreadyExist;
     }
 
     /**
-     * @Route("/medicos/{id}", methods={"DELETE"})
+     * @Route ("/especialidades/{specialityId}/medicos", methods={"GET"})
      */
-    public function removeDoctor(int $id)
+    public function queryForSpeciality(int $specialityId): Response
     {
-        $doctor = $this->findDoctor($id);
+        $doctor = $this->doctorRepository->findBy([
+            'speciality' => $specialityId
+        ]);
 
-        $this->entityManager->remove($doctor);
-        $this->entityManager->flush();
+        return new JsonResponse($doctor);
 
-        return new Response('', Response::HTTP_NO_CONTENT);
-
-    }
-
-
-    public function findDoctor(int $id)
-    {
-        $doctorRepository = $this->getDoctrine()->getRepository(Doctor::class);
-        $doctor = $doctorRepository->find($id);
-
-        return $doctor;
     }
 }

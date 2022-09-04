@@ -1,3 +1,54 @@
 #index:
 #    path: /
 #    controller: App\Controller\DefaultController::index
+specialities:
+  path: /especialidades
+  controller: App\Controller\SpecialityController::getAll
+  methods:
+    - GET
+speciality:
+  path: /especialidades/{id}
+  controller: App\Controller\SpecialityController::getOne
+  methods:
+    - GET
+new_speciality:
+  path: /especialidades
+  controller: App\Controller\SpecialityController::create
+  methods:
+    - POST
+remove_speciality:
+  path: /especialidades/{id}
+  controller: App\Controller\SpecialityController::remove
+  methods:
+    - DELETE
+change_speciality:
+  path: /especialidades/{id}
+  controller: App\Controller\SpecialityController::change
+  methods:
+    - PUT
+
+doctors:
+  path: /medicos
+  controller: App\Controller\DoctorController::getAll
+  methods:
+    - GET
+doctor:
+  path: /medicos/{id}
+  controller: App\Controller\DoctorController::getOne
+  methods:
+    - GET
+new_doctor:
+  path: /medicos
+  controller: App\Controller\DoctorController::create
+  methods:
+    - POST
+remove_doctor:
+  path: /medicos/{id}
+  controller: App\Controller\DoctorController::remove
+  methods:
+    - DELETE
+change_doctor:
+  path: /medicos/{id}
+  controller: App\Controller\DoctorController::change
+  methods:
+    - PUT

@@ -5,14 +5,19 @@ namespace App\Helper;
 use App\Entity\Doctor;
 use App\Repository\SpecialityRepository;
 
-class DoctorFactory
+class DoctorFactory implements \App\Helper\EntityFactoryInterface
 {
+    /**
+     * @var SpecialityRepository
+     */
+    private $specialityRepository;
+
     public function __construct(SpecialityRepository $specialityRepository)
     {
         $this->specialityRepository = $specialityRepository;
     }
 
-    public function createDoctor(string $json): Doctor
+    public function createEntity(string $json): Doctor
     {
         $data = json_decode($json);
 
