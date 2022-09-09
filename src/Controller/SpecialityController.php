@@ -26,10 +26,7 @@ class SpecialityController extends BaseController
         parent::__construct($entityManager, $factory ,$specialityRepository, $extractDataRequest );
     }
 
-//    /**
-//     * @Route("/especialidades/{id}", methods={"PUT"})
-//     */
-    public function changeEntityAlreadyExist(int $id, $entity)
+    public function changeEntityAlreadyExist(int $id, $entity): Speciality
     {
         /** @var Speciality $entityAlreadyExist */
         $entityAlreadyExist = $this->repository->find($id);

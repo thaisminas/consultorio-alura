@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\Types\This;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\DoctorRepository")
@@ -76,7 +77,17 @@ class Doctor implements \JsonSerializable
             'id' => $this->getId(),
             'crm' => $this->getCrm(),
             'name' => $this->getName(),
-            'specialityId' => $this->getSpeciality()->getId()
+            'specialityId' => $this->getSpeciality()->getId(),
+            '_link' => [
+                [
+                    'rel' => 'self',
+                    'path' => '/medicos/' . $this->getId(),
+                ],
+                [
+                    'rel' => 'especialidade',
+                    'path' => '/especialidade' . $this->getSpeciality()->getId()
+                ]
+            ]
         ];
     }
 }

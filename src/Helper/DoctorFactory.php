@@ -5,7 +5,7 @@ namespace App\Helper;
 use App\Entity\Doctor;
 use App\Repository\SpecialityRepository;
 
-class DoctorFactory implements \App\Helper\EntityFactoryInterface
+class DoctorFactory implements EntityFactoryInterface
 {
     /**
      * @var SpecialityRepository

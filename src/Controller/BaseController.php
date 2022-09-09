@@ -7,6 +7,7 @@ use App\Entity\Doctor;
 use App\Helper\DoctorFactory;
 use App\Helper\EntityFactoryInterface;
 use App\Helper\ExtractDataRequest;
+use App\Helper\ResponseFactory;
 use App\Repository\DoctorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
@@ -51,12 +52,18 @@ abstract class BaseController extends AbstractController
     }
 
 
-    public function getAll(Request $request)
+    public function getAll(Request $request): JsonResponse
     {
         $informationFilter = $this->extractDataRequest->getDataFilter($request);
         $informationOrder = $this->extractDataRequest->getDataOrdernation($request);
-        $list = $this->repository->findBy($informationFilter, $informationOrder);
-        return new JsonResponse($list);
+        [$currentPage, $itemPerPage] = $this->extractDataRequest->getDataPage($request);
+
+
+        $list = $this->repository->findBy($informationFilter, $informationOrder, $itemPerPage, ($currentPage -1) * $itemPerPage);
+
+        $responseFactory = new ResponseFactory(true, $currentPage, $itemPerPage, $list);
+
+        return $responseFactory->getResponse();
     }
 
     public function create(Request $request): Response
@@ -94,7 +101,9 @@ abstract class BaseController extends AbstractController
             $entityAlreadExist = $this->changeEntityAlreadyExist($id, $entity);
             $this->entityManager->flush();
 
-            return new JsonResponse($entityAlreadExist);
+            $factory = new ResponseFactory(true, $entityAlreadExist, Response::HTTP_OK);
+
+            return $factory->getResponse();
         } catch (\InvalidArgumentException $ex) {
             return new Response('', Response::HTTP_NOT_FOUND);
         }
