@@ -61,7 +61,7 @@ abstract class BaseController extends AbstractController
 
         $list = $this->repository->findBy($informationFilter, $informationOrder, $itemPerPage, ($currentPage -1) * $itemPerPage);
 
-        $responseFactory = new ResponseFactory(true, $currentPage, $itemPerPage, $list);
+        $responseFactory = new ResponseFactory(true, $list, Response::HTTP_OK, $currentPage, $itemPerPage);
 
         return $responseFactory->getResponse();
     }

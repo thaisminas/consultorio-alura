@@ -28,7 +28,7 @@ class ExtractDataRequest
 
     public function getDataOrdernation(Request $request)
     {
-        [$informationOrder,] = $this->getDataRequest($request);
+        [, $informationOrder] = $this->getDataRequest($request);
         return $informationOrder;
     }
 

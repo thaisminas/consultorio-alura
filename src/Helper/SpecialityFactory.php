@@ -6,7 +6,7 @@ use App\Entity\Speciality;
 
 class SpecialityFactory implements EntityFactoryInterface
 {
-    public function createEntity(string $json)
+    public function createEntity(string $json): Speciality
     {
         $dataJson = json_decode($json);
         $speciality = new Speciality();
