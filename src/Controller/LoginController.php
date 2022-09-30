@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Repository\UserRepository;
+use Firebase\JWT\JWT;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -49,15 +51,16 @@ class LoginController extends AbstractController
         ]);
 
         if(!$this->encoder->isPasswordValid($user, $dadosEmJson->senha)){
+            var_dump($user);
             return new JsonResponse([
-                'erro' => 'Usuario ou senha invalido',
+                'erro' => 'Usuario ou senha invalido'],
                 Response::HTTP_UNAUTHORIZED
-            ]);
+            );
         }
 
         $token = JWT::encode(['username' => $user->getUsername()], 'chave', 'HS256');
 
-        return new JsonResponse(['acess_token' => $token]);
+        return new JsonResponse(['access_token' => $token]);
 
     }
 }
