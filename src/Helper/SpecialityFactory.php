@@ -14,4 +14,15 @@ class SpecialityFactory implements EntityFactoryInterface
 
         return $speciality;
     }
+
+    /**
+     * @param $objetJson
+     * @throws EntityFactoryException
+     */
+    private function checkIfDescriptionExists($objetJson): void
+    {
+        if (!property_exists($objetJson, 'descricao')) {
+            throw new EntityFactoryException('A descrição de uma especialidade é obrigatória');
+        }
+    }
 }

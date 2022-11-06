@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Entity\HyperMidiResponse;
 use App\Repository\UserRepository;
 use Firebase\JWT\JWT;
 use http\Env\Response;
@@ -12,6 +13,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+
 
 class JwtAutenticator extends AbstractGuardAuthenticator
 {
@@ -37,9 +39,12 @@ class JwtAutenticator extends AbstractGuardAuthenticator
 
     public function getCredentials(Request $request)
     {
-        $token = str_replace('Bearer', '', $request->headers->get('Authorization'));
-
-        return JWT::decode($token, 'chave', ['HS256']);
+        try {
+            $token = str_replace('Bearer', '', $request->headers->get('Authorization'));
+            return JWT::decode($token, $_ENV['JWT_KEY'], ['HS256']);
+        } catch (\Exception $e){
+            return false;
+        }
     }
 
     public function getUser($credentials, UserProviderInterface $userProvider)
@@ -58,8 +63,11 @@ class JwtAutenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        return new JsonResponse([
-            'erro' => 'Falha na autenticacao',], 400);
+        $response = new HyperMidiResponse([
+            'mensagem' => 'Falha na autenticação'
+        ], false, \Symfony\Component\HttpFoundation\Response::HTTP_UNAUTHORIZED, null);
+
+        return $response->getResponse();
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)

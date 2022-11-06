@@ -8,6 +8,7 @@ use App\Helper\DoctorFactory;
 use App\Helper\ExtractDataRequest;
 use App\Repository\DoctorRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,9 +31,10 @@ class DoctorController extends BaseController
     public function __construct(EntityManagerInterface $entityManager,
         DoctorFactory $doctorFactory,
         DoctorRepository $doctorRepository,
-        ExtractDataRequest $extractDataRequest
+        ExtractDataRequest $extractDataRequest,
+        CacheItemPoolInterface $cache
     ){
-        parent::__construct($entityManager, $doctorFactory, $doctorRepository, $extractDataRequest) ;
+        parent::__construct($entityManager, $doctorFactory, $doctorRepository, $extractDataRequest, $cache) ;
         $this->doctorFactory = $doctorFactory;
         $this->doctorRepository = $doctorRepository;
     }
@@ -62,5 +64,21 @@ class DoctorController extends BaseController
 
         return new JsonResponse($doctor);
 
+    }
+
+    public function updateExistingEntity(int $id, $entity)
+    {
+        /** @var Doctor $doctorExist */
+        $doctorExist = $this->getDoctrine()->getRepository(Doctor::class)->find($id);
+        $doctorExist->setName($entity->getName());
+        $doctorExist->setCrm($entity->getCrm());
+        $doctorExist->setSpeciality($entity->getSpeciality());
+
+        return $doctorExist;
+    }
+
+    public function cachePrefix(): string
+    {
+        return 'doctor_';
     }
 }

@@ -11,6 +11,7 @@ use App\Helper\ResponseFactory;
 use App\Repository\DoctorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,16 +40,23 @@ abstract class BaseController extends AbstractController
      */
     private $extractDataRequest;
 
+    /**
+     * @var CacheItemPoolInterface
+     */
+    private $cache;
+
 
     public function __construct(EntityManagerInterface $entityManager,
                                 EntityFactoryInterface $factory,
                                 ObjectRepository $repository,
-                                ExtractDataRequest $extractDataRequest
+                                ExtractDataRequest $extractDataRequest,
+                                CacheItemPoolInterface $cache
     ){
         $this->entityManager = $entityManager;
         $this->factory = $factory;
         $this->repository = $repository;
         $this->extractDataRequest = $extractDataRequest;
+        $this->cache = $cache;
     }
 
 
@@ -73,6 +81,10 @@ abstract class BaseController extends AbstractController
 
         $this->entityManager->persist($entity);
         $this->entityManager->flush();
+        $cacheItem = $this->cache->getItem($this->cachePrefix() . $entity->getId());
+
+        $cacheItem->set($entity);
+        $this->cache->save($cacheItem);
 
         return new JsonResponse($entity);
     }
@@ -110,4 +122,6 @@ abstract class BaseController extends AbstractController
     }
 
     abstract function changeEntityAlreadyExist(int $id, $entity);
+    abstract public function updateExistingEntity(int $id, $entity);
+    abstract public function cachePrefix(): string;
 }

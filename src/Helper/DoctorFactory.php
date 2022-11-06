@@ -25,6 +25,10 @@ class DoctorFactory implements EntityFactoryInterface
 
         $speciality = $this->specialityRepository->find($specialityId);
 
+        if (is_null($speciality)) {
+            throw new EntityFactoryException('Especialidade inexistente');
+        }
+
         $doctor = new Doctor();
 
         $doctor->setCrm($data->crm);
@@ -32,5 +36,21 @@ class DoctorFactory implements EntityFactoryInterface
         $doctor->setSpeciality($speciality);
 
         return $doctor;
+    }
+
+
+    private function checkIfAllPropertiesExist(object $objetoJson): void
+    {
+        if (!property_exists($objetoJson, 'nome')) {
+            throw new EntityFactoryException('Médico precisa de nome');
+        }
+
+        if (!property_exists($objetoJson, 'crm')) {
+            throw new EntityFactoryException('Médico precisa de CRM');
+        }
+
+        if (!property_exists($objetoJson, 'especialidadeId')) {
+            throw new EntityFactoryException('Médico precisa de especialidade');
+        }
     }
 }
